@@ -24,7 +24,7 @@ func NewCTR(key []byte, iv []byte) cipher.Stream {
 // DoCTR performs a one-shot AES-256 CTR operation on data. The function reuses
 // the data slice for the output.  As a convenience, this function also returns
 // the slice.
-func DoCTR(data, key, iv []byte) []byte {
+func DoCTR(key, iv, data []byte) []byte {
 	aesctr := NewCTR(key, iv)
 	aesctr.XORKeyStream(data, data)
 	return data
@@ -34,14 +34,14 @@ func DoCTR(data, key, iv []byte) []byte {
 // This function reuses the data slice for the ciphertext.  Thus, on return,
 // the plaintext is ovewritten with the ciphertext.  As a convenience, this
 // function also returns the slice.
-func EncryptCTR(data, key, iv []byte) []byte {
-	return DoCTR(data, key, iv)
+func EncryptCTR(key, iv, data []byte) []byte {
+	return DoCTR(key, iv, data)
 }
 
 // EncryptCTR performs a one-shot AES-256 CTR decryption of the ciphertext
 // data.  This function reuses the data slice for the plaintext.  Thus, on
 // return, the ciphertext is ovewritten with the plaintext.  As a convenience,
 // this function also returns the slice.
-func DecryptCTR(data, key, iv []byte) []byte {
-	return DoCTR(data, key, iv)
+func DecryptCTR(key, iv, data []byte) []byte {
+	return DoCTR(key, iv, data)
 }

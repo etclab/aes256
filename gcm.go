@@ -31,7 +31,7 @@ func NewGCM(key []byte) cipher.AEAD {
 // the plaintext.  Note that this function may reuse the data slice to hold
 // the ciphertext and tag.  Thus the caller must not assume that data stil
 // holds the plaintext when this function returns.
-func EncryptGCM(data, additionalData, key, nonce []byte) []byte {
+func EncryptGCM(key, nonce, data, additionalData []byte) []byte {
 	aead := NewGCM(key)
 	return aead.Seal(data[:0], nonce, data, additionalData)
 }
@@ -53,7 +53,7 @@ func SplitCiphertextTag(ciphertext []byte) ([]byte, []byte, error) {
 // the ciphertext data and additionalData.  Note that this function may reuse
 // the data slice to hold the plaintext.  On success, the function returns the
 // plaintext.
-func DecryptGCM(data, additionalData, key, nonce []byte) ([]byte, error) {
+func DecryptGCM(key, nonce, data, additionalData []byte) ([]byte, error) {
 	aead := NewGCM(key)
 	return aead.Open(data[:0], nonce, data, additionalData)
 }
