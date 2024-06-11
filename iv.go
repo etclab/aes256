@@ -9,7 +9,7 @@ import (
 	"github.com/etclab/mu"
 )
 
-// IVSize is the AES-256 IV size in bytes.
+// IVSize is the AES IV size in bytes.
 const IVSize = 16
 
 // IVSizeError indicates an invalid IV size.  The integer value of the
@@ -20,7 +20,7 @@ func (i IVSizeError) Error() string {
 	return "aes256: invalid IV size " + strconv.Itoa(int(i))
 }
 
-// ReadIVFile reads an AES-256 IV from a file.  The file should contain
+// ReadIVFile reads an AES IV from a file.  The file should contain
 // exactly [IVSize] bytes.  If the file contains a different number of bytes,
 // this functions returns an [IVSizeError].
 func ReadIVFile(path string) ([]byte, error) {
@@ -37,7 +37,7 @@ func ReadIVFile(path string) ([]byte, error) {
 	return iv, nil
 }
 
-// NewRandomIV generates a random AES-256 IV.
+// NewRandomIV generates a random AES IV.
 func NewRandomIV() []byte {
 	iv := make([]byte, IVSize)
 	_, err := rand.Read(iv)
@@ -52,6 +52,9 @@ func NewZeroIV() []byte {
 	return make([]byte, IVSize)
 }
 
+// AddIV adds x to the iv value, handling wrap-around when the iv
+// would exceed [IVSize] bytes.  iv is an in-out parameter, as well
+// as the return value.
 func AddIV(iv []byte, x int) []byte {
 	if len(iv) != IVSize {
 		mu.Panicf("aes256.AddIV: %v", IVSizeError(len(iv)))
@@ -64,14 +67,20 @@ func AddIV(iv []byte, x int) []byte {
 	return iv
 }
 
+// IncIV increments the iv value by one, handling wrap-around when the iv
+// would exceed [IVSize] bytes.  iv is an in-out parameter, as well
+// as the return value.
 func IncIV(iv []byte) []byte {
 	return AddIV(iv, 1)
 }
 
+// DecIV decrements the iv value by one, handling wrap-around when the iv would
+// become negative.  iv is an in-out parameter, as well as the return value.
 func DecIV(iv []byte) []byte {
 	return AddIV(iv, -1)
 }
 
+// CopyIV makes a deep copy of the iv and returns the copy.
 func CopyIV(iv []byte) []byte {
 	if len(iv) != IVSize {
 		mu.Panicf("aes256.CopyIV: %v", IVSizeError(len(iv)))
@@ -81,6 +90,7 @@ func CopyIV(iv []byte) []byte {
 	return _new
 }
 
+// IVToNonce makes a copy of iv, truncated to [NonceSize].
 func IVToNonce(iv []byte) []byte {
 	if len(iv) != IVSize {
 		mu.Panicf("aes256.AddIV: %v", IVSizeError(len(iv)))

@@ -28,9 +28,10 @@ func NewGCM(key []byte) cipher.AEAD {
 }
 
 // EncryptGCM performs a one-shot AES-256 GCM encryption operation and returns
-// the plaintext.  Note that this function may reuse the data slice to hold
-// the ciphertext and tag.  Thus the caller must not assume that data stil
-// holds the plaintext when this function returns.
+// the plaintext.  Note that this function overwrites the data slice to hold
+// the ciphertext and tag.  Since the addition of the tag may cause a new
+// allocation, the caller should use the return slice as the output value,
+// rather than treat data as an in-out parameter.
 func EncryptGCM(key, nonce, data, additionalData []byte) []byte {
 	aead := NewGCM(key)
 	return aead.Seal(data[:0], nonce, data, additionalData)
@@ -50,9 +51,10 @@ func SplitCiphertextTag(ciphertext []byte) ([]byte, []byte, error) {
 }
 
 // DecryptGCM performs a one-shot AES-256 GCM decryption and authentication of
-// the ciphertext data and additionalData.  Note that this function may reuse
+// the ciphertext data and additionalData.   Note that this function overwrites
 // the data slice to hold the plaintext.  On success, the function returns the
-// plaintext.
+// plaintext.  Callers should generally use the return value, rather than
+// treat data as an in-put parameter.
 func DecryptGCM(key, nonce, data, additionalData []byte) ([]byte, error) {
 	aead := NewGCM(key)
 	return aead.Open(data[:0], nonce, data, additionalData)

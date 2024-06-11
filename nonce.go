@@ -20,7 +20,7 @@ func (n NonceSizeError) Error() string {
 	return "aes256: invalid nonce size " + strconv.Itoa(int(n))
 }
 
-// ReadNonceFile reads an AES-256 GCM nonc from a file.  The file should contain
+// ReadNonceFile reads an AES-256 GCM nonce from a file.  The file should contain
 // exactly [NonceSize] bytes.  If the file contains a different number of bytes,
 // this functions returns an [NonceSizeError].
 func ReadNonceFile(path string) ([]byte, error) {
@@ -52,6 +52,9 @@ func NewZeroNonce() []byte {
 	return make([]byte, NonceSize)
 }
 
+// AddNonce adds x to the nonce value, handling wrap-around when the nonce
+// would exceed [NonceSize] bytes.  nonce is an in-out parameter, as well as
+// the return value.
 func AddNonce(nonce []byte, x int) []byte {
 	if len(nonce) != NonceSize {
 		mu.Panicf("aes256.AddNonce: %v", NonceSizeError(len(nonce)))
@@ -64,14 +67,21 @@ func AddNonce(nonce []byte, x int) []byte {
 	return nonce
 }
 
+// IncNonce increments the nonce value by one, handling wrap-around when the
+// nonce would exceed [NonceSize] bytes.  ononce is an in-out parameter, as
+// well as the return value.
 func IncNonce(nonce []byte) []byte {
 	return AddNonce(nonce, 1)
 }
 
+// DecNonce decrements the nonce value by one, handling wrap-around when the
+// nonce would become negative.  nonce is an in-out parameter, as well as the
+// return value.
 func DecNonce(nonce []byte) []byte {
 	return AddNonce(nonce, -1)
 }
 
+// CopyNonce makes a deep copy of the nonce and returns the copy.
 func CopyNonce(nonce []byte) []byte {
 	if len(nonce) != NonceSize {
 		mu.Panicf("aes256.CopyNonce: %v", NonceSizeError(len(nonce)))
