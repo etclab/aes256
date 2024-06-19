@@ -41,8 +41,8 @@ func EncryptGCM(key, nonce, data, additionalData []byte) []byte {
 // and returns the two components of the ciphertext: the ciphertext proper, and
 // the authentication tag (which is conventionally appended to the ciphertext).
 func SplitCiphertextTag(ciphertext []byte) ([]byte, []byte, error) {
-	if len(ciphertext) <= TagSize {
-		return nil, nil, fmt.Errorf("ciphertext (%d bytes) <= AES GCM tag size (%d)", len(ciphertext), TagSize)
+	if len(ciphertext) < TagSize {
+		return nil, nil, fmt.Errorf("ciphertext (%d bytes) < AES GCM tag size (%d)", len(ciphertext), TagSize)
 	}
 
 	tag := ciphertext[len(ciphertext)-TagSize:]
